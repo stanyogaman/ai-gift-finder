@@ -103,3 +103,4 @@ Vite config
 Railway config
 
 .railway
+dist/
