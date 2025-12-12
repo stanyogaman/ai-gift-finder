@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  PARTNER
+}
+
+enum BadgeType {
+  ECO_PICK
+  TOP_MATCH
+  BEST_DEAL
+  PREMIUM_CHOICE
+  HOT_DEAL
+  BEST_VALUE
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String?
+  image         String?
+  googleId      String?       @unique
+  role          UserRole      @default(USER)
+  quizAnswers   QuizAnswers[]
+  recommendations Recommendation[]
+  clicks        Click[]
+  conversions   Conversion[]
+  partner       Partner?
+  admin         Admin?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @unique
+  permissions Json?
+  createdAt DateTime @default(now())
+}
+
+model Partner {
+  id           String                  @id @default(cuid())
+  user         User                    @relation(fields: [userId], references: [id])
+  userId       String                  @unique
+  companyName  String?
+  website      String?
+  token        String?                 @unique
+  credentials  PartnerApiCredential?
+  products     Product[]
+  clicks       Click[]
+  conversions  Conversion[]
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+}
+
+model PartnerApiCredential {
+  id         String   @id @default(cuid())
+  partner    Partner  @relation(fields: [partnerId], references: [id])
+  partnerId  String   @unique
+  provider   String
+  apiKey     String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}
+
+model Product {
+  id            String          @id @default(cuid())
+  partner       Partner?        @relation(fields: [partnerId], references: [id])
+  partnerId     String?
+  title         String
+  description   String
+  price         Decimal         @db.Decimal(10, 2)
+  currency      String          @default("USD")
+  category      String
+  rating        Decimal?        @db.Decimal(3, 2)
+  discount      Decimal?        @db.Decimal(5, 2)
+  url           String
+  seller        String?
+  seoTitle      String?
+  seoTags       String[]
+  badges        BadgeType[]
+  images        ProductImage[]
+  recommendations Recommendation[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  createdAt DateTime @default(now())
+}
+
+model QuizAnswers {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  preferences String[]
+  event       String
+  budgetMin   Decimal  @db.Decimal(10, 2)
+  budgetMax   Decimal  @db.Decimal(10, 2)
+  notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model Recommendation {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  score     Decimal  @db.Decimal(4, 3)
+  factors   Json
+  createdAt DateTime @default(now())
+}
+
+model Click {
+  id          String   @id @default(cuid())
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  partner     Partner? @relation(fields: [partnerId], references: [id])
+  partnerId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  productId   String?
+  recommendation Recommendation? @relation(fields: [recommendationId], references: [id])
+  recommendationId String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+}
+
+model Conversion {
+  id          String   @id @default(cuid())
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  partner     Partner? @relation(fields: [partnerId], references: [id])
+  partnerId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  productId   String?
+  click       Click?   @relation(fields: [clickId], references: [id])
+  clickId     String?
+  amount      Decimal  @db.Decimal(10, 2)
+  currency    String   @default("USD")
+  status      String   @default("PENDING")
+  metadata    Json?
+  createdAt   DateTime @default(now())
+}
+
+model Article {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String   @unique
+  content   String
+  seoTitle  String?
+  seoDescription String?
+  tags      String[]
+  authorId  String?
+  author    Admin?   @relation(fields: [authorId], references: [id])
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AiLog {
+  id        String   @id @default(cuid())
+  provider  String
+  model     String
+  payload   Json
+  response  Json
+  status    String
+  createdAt DateTime @default(now())
+}

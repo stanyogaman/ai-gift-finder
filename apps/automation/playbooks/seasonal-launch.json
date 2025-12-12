@@ -1,0 +1,18 @@
+{
+  "name": "Seasonal Launch Autopilot",
+  "description": "Sample n8n workflow orchestrating AWSEEN seasonal drops.",
+  "nodes": [
+    { "id": "cron", "type": "cron", "parameters": { "rule": "0 */4 * * *" } },
+    {
+      "id": "fetch-feed",
+      "type": "httpRequest",
+      "parameters": {
+        "url": "https://partner-feed.awseen.com/seasonal.csv",
+        "method": "GET"
+      }
+    },
+    { "id": "gemini-enrich", "type": "httpRequest", "parameters": { "url": "https://backend.awseen.com/api/admin/enrich", "method": "POST" } },
+    { "id": "notify", "type": "slack", "parameters": { "channel": "#awseen-launches" } }
+  ],
+  "connections": {}
+}
