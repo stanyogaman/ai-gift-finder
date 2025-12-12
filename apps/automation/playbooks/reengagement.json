@@ -1,0 +1,10 @@
+{
+  "name": "High Intent Re-engagement",
+  "description": "Make.com friendly webhook consumer for AWSEEN conversions.",
+  "nodes": [
+    { "id": "webhook", "type": "webhook", "parameters": { "path": "/partner/high-intent", "method": "POST" } },
+    { "id": "score", "type": "function", "parameters": { "code": "return items.map(item => ({ json: { score: Math.random() } }));" } },
+    { "id": "sync", "type": "httpRequest", "parameters": { "url": "https://crm.awseen.com/api/leads", "method": "POST" } }
+  ],
+  "connections": {}
+}
