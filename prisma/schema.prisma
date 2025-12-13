@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum PartnerRequestStatus {
+  NEW
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id               String    @id // Firebase UID
+  email            String?   @unique
+  displayName      String?
+  photoURL         String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  role             UserRole  @default(USER)
+  locale           String    @default("en")
+  marketingConsent Boolean   @default(false)
+
+  quizSessions  QuizSession[]
+  favorites     UserFavorite[]
+
+  @@map("users")
+}
+
+model QuizSession {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  locale       String   @default("en")
+  rawAnswers   Json
+  tags         String[]
+  budgetMin    Int?
+  budgetMax    Int?
+  relationship String?
+  occasion     String?
+  emotion      String?
+  aiPrompt     String?  @db.Text
+  aiModel      String?
+  aiResponseRaw Json?
+
+  giftIdeas GiftIdea[]
+
+  @@map("quiz_sessions")
+}
+
+model GiftIdea {
+  id               String      @id @default(cuid())
+  quizSessionId    String
+  quizSession      QuizSession @relation(fields: [quizSessionId], references: [id], onDelete: Cascade)
+  title            String
+  description      String      @db.Text
+  imageUrl         String?
+  productUrl       String?
+  merchant         String?
+  priceEstimate    Int?
+  tags             String[]
+  scoreRelevance   Float       @default(0)
+  scoreProfitability Float     @default(0)
+  isFavorite       Boolean     @default(false)
+
+  favorites UserFavorite[]
+
+  @@map("gift_ideas")
+}
+
+model GiftTemplate {
+  id                  String   @id @default(cuid())
+  title_en            String
+  title_ru            String?
+  description_en      String   @db.Text
+  description_ru      String?  @db.Text
+  imageUrl            String?
+  productUrl          String?
+  merchant            String?
+  minPrice            Int?
+  maxPrice            Int?
+  tags                String[]
+  occasionTags        String[]
+  relationshipTags    String[]
+  profitabilityScore  Float    @default(0)
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("gift_templates")
+}
+
+model BlogCategory {
+  id         String     @id @default(cuid())
+  slug       String     @unique
+  name_en    String
+  name_ru    String?
+  createdAt  DateTime   @default(now())
+
+  posts BlogPost[]
+
+  @@map("blog_categories")
+}
+
+model BlogPost {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  published       Boolean       @default(false)
+  featured        Boolean       @default(false)
+  categoryId      String?
+  category        BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  heroImageUrl    String?
+  seoTitle_en     String?
+  seoTitle_ru     String?
+  seoDescription_en String?     @db.Text
+  seoDescription_ru String?     @db.Text
+  title_en        String
+  title_ru        String?
+  content_en      String        @db.Text
+  content_ru      String?       @db.Text
+
+  @@map("blog_posts")
+}
+
+model StaticPage {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  title_en   String
+  title_ru   String?
+  content_en String   @db.Text
+  content_ru String?  @db.Text
+  updatedAt  DateTime @updatedAt
+
+  @@map("static_pages")
+}
+
+model PartnerRequest {
+  id        String               @id @default(cuid())
+  createdAt DateTime             @default(now())
+  name      String
+  email     String
+  company   String?
+  website   String?
+  country   String?
+  message   String               @db.Text
+  status    PartnerRequestStatus @default(NEW)
+  notes     String?              @db.Text
+
+  @@map("partner_requests")
+}
+
+model UserFavorite {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  giftIdeaId  String?
+  giftIdea    GiftIdea? @relation(fields: [giftIdeaId], references: [id], onDelete: Cascade)
+  templateId  String?
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, giftIdeaId])
+  @@map("user_favorites")
+}
+
+model QuizQuestion {
+  id          String   @id @default(cuid())
+  questionId  String   @unique
+  order       Int
+  question_en String
+  question_ru String?
+  type        String   @default("single") // single, multiple, slider, text
+  options     Json     // Array of {value, text_en, text_ru, icon, next?}
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("quiz_questions")
+}
