@@ -3,10 +3,11 @@ import { Button, NavigationMenu, NavigationMenuItem, NavigationMenuLink, Navigat
 import { ThemeToggle } from './theme-toggle';
 
 const navItems = [
-  { href: '/client', label: 'Client Panel' },
-  { href: '/admin', label: 'Admin Panel' },
-  { href: '/partner', label: 'Partner Panel' },
-  { href: '/automation', label: 'Automation' }
+  { href: '/quiz', label: 'Find Gifts' },
+  { href: '/blog', label: 'Gift Guides' },
+  { href: '/client', label: 'Dashboard' },
+  { href: '/admin', label: 'Admin' },
+  { href: '/partner', label: 'Partner' }
 ];
 
 export function SiteHeader() {

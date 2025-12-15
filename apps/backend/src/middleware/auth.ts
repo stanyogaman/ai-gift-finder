@@ -5,7 +5,7 @@ export interface AuthenticatedRequest extends Request {
   user?: { id: string; role: string };
 }
 
-export const authenticate = (roles?: string[]) => {
+export const authenticate = (options?: string[] | { requireAdmin?: boolean; roles?: string[] }) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const header = req.headers.authorization;
 
@@ -23,6 +23,23 @@ export const authenticate = (roles?: string[]) => {
         };
       }
 
+      // Handle legacy array format or new options format
+      let roles: string[] | undefined;
+      let requireAdmin = false;
+
+      if (Array.isArray(options)) {
+        roles = options;
+      } else if (options && typeof options === 'object') {
+        roles = options.roles;
+        requireAdmin = options.requireAdmin || false;
+      }
+
+      // Check admin requirement
+      if (requireAdmin && req.user?.role !== 'ADMIN') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      // Check role requirements
       if (roles && req.user && !roles.includes(req.user.role)) {
         return res.status(403).json({ message: 'Forbidden' });
       }
