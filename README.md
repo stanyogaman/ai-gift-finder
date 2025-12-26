@@ -1,8 +1,9 @@
 # Atelier Samui - Premium Palm Wood Furniture
 
-![Atelier Samui](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
+![Atelier Samui](https://img.shields.io/badge/Next.js-14.2.35-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8?style=for-the-badge&logo=tailwind-css)
+![Security](https://img.shields.io/badge/CVE--2025--55182-Not%20Vulnerable-brightgreen?style=for-the-badge)
 
 **Premium tropical furniture website for custom-built furniture from sustainable palm wood.**
 
@@ -125,6 +126,24 @@ See **EMAIL_SETUP.md** for detailed setup instructions.
 - **Forms:** React Hook Form
 - **Email:** Nodemailer / SendGrid / Resend
 - **Maps:** Google Maps Embed API
+
+---
+
+## 🔒 Security
+
+**Protected Against Critical Vulnerabilities**
+
+This project is secured against recent critical vulnerabilities:
+- ✅ **CVE-2025-55182** (React2Shell) - Not vulnerable (using React 18.3.1)
+- ✅ **CVE-2025-55184** - Patched (Next.js 14.2.35)
+- ✅ **CVE-2025-67779** - Patched (Next.js 14.2.35)
+
+**Current Security Status:**
+- React: `18.3.1` (React 19 vulnerability does not affect this version)
+- Next.js: `14.2.35` (includes all security patches)
+- Regular dependency scanning and updates
+
+📋 **[Full Security Advisory →](SECURITY.md)**
 
 ---
 
